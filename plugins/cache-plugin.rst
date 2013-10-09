@@ -5,7 +5,7 @@ HTTP Cache plugin
 Guzzle can leverage HTTP's caching specifications using the ``Guzzle\Plugin\Cache\CachePlugin``. The CachePlugin
 provides a private transparent proxy cache that caches HTTP responses. The caching logic, based on
 `RFC 2616 <http://www.w3.org/Protocols/rfc2616/rfc2616-sec13.html>`_, uses HTTP headers to control caching behavior,
-cache lifetime, and supports ETag and Last-Modified based revalidation:
+cache lifetime, and supports Vary, ETag, and Last-Modified based revalidation:
 
 .. code-block:: php
 
@@ -35,10 +35,20 @@ cache lifetime, and supports ETag and Last-Modified based revalidation:
     $client->get('http://www.wikipedia.org/')->send();
 
 The cache plugin intercepts GET and HEAD requests before they are actually transferred to the origin server. The cache
-plugin then generates a hash key based on the request message and checks to see if a response exists in the cache. If
-a response exists in the cache, the cache adapter then checks to make sure that the response is still fresh. If the
-response is fresh and passes any required revalidation, then the cached response is served instead of contacting the
-origin server.
+plugin then generates a hash key based on the request method and URL, and checks to see if a response exists in the cache. If
+a response exists in the cache, the cache adapter then checks to make sure that the caching rules associated with the response 
+satisfy the request, and ensures that response still fresh. If the response is acceptable for the request any required 
+revalidation, then the cached response is served instead of contacting the origin server.
+
+Vary
+----
+
+Cache keys are derived from a request method and a request URL. Multiple responses can map to the same cache key and 
+stored in Guzzle's underlying cache storage object. You should use the ``Vary`` HTTP header to tell the cache storage
+object that the cache response must have been cached for a request that matches the headers specified in the Vary header
+of the request. This allows you to have specific cache entries for the same request URL but variations in a request's 
+headers determine which cache entry is served. Please see the http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.44 
+for more information.
 
 Cache options
 -------------
@@ -77,17 +87,16 @@ the origin server. Setting this parameter to ``skip`` will never revalidate and 
 Normalizing requests for caching
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Use the ``cache.key_filter`` parameter if you wish to strip certain headers or query string parameters from your
-request before creating a unique hash for the request. This parameter can be useful if you send a special authorization
-header that changes based on the date, but still wish to cache the responses of those requests. The cache.key_filter
-format can contain a list of ``query`` and ``header`` values to remove from the request hash. You are not required to
-specify both a query or header list, and either list can contain one or more keys to ignore. For example, here we are
-saying that the ``a`` and ``q`` query string variables and the ``Date`` header should be ignored when generating a
-hash key for the request:
+Use the ``cache.key_filter`` parameter if you wish to strip certain query string parameters from your
+request before creating a unique hash for the request. This parameter can be useful if your requests have query 
+string values that cause each request URL to be unique (thus preventing a cache hit). The ``cache.key_filter``
+format is simply a comma separated list of query string values to remove from the URL when creating a cache key. 
+For example, here we are saying that the ``a`` and ``q`` query string variables should be ignored when generating a
+cache key for the request:
 
 .. code-block:: php
 
-    $request->getParams()->set('cache.key_filter', 'query=a, q; header=Date, Host');
+    $request->getParams()->set('cache.key_filter', 'a, q');
 
 Other options
 ~~~~~~~~~~~~~
@@ -105,8 +114,10 @@ options of a client.
 .. code-block:: php
 
     $client = new Guzzle\Http\Client('http://www.test.com', array(
-        'params.cache.override_ttl' => 3600,
-        'params.cache.revalidate'   => 'never'
+        'request.params' => array(
+            'cache.override_ttl' => 3600,
+            'params.cache.revalidate'   => 'never'
+        )
     ));
 
     echo $client->get('/')->getParams()->get('cache.override_ttl');
