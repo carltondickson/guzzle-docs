@@ -95,7 +95,7 @@ or special options that alter the client's behavior:
 |                               | "CURLOPT_PROXY" will be converted to the constant ``CURLOPT_PROXY``).               |
 +-------------------------------+-------------------------------------------------------------------------------------+
 | ``ssl.certificate_authority`` | Set to true to use the Guzzle bundled SSL certificate bundle (this is used by       |
-|                               | default, or null to use the bundle on your system, a string pointing to a file to   |
+|                               | default, 'system' to use the bundle on your system, a string pointing to a file to  |
 |                               | use a specific certificate file, a string pointing to a directory to use multiple   |
 |                               | certificates, or ``false`` to disable SSL validation (not recommended).             |
 |                               |                                                                                     |
