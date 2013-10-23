@@ -227,37 +227,6 @@ Here's a very simple example of implementing a custom responseClass object.
         }
     }
 
-Domain objects that use model parsing
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Here's a slightly more complex example that still utilizes Guzzle default response parsing using a service description
-definition, but adds some custom logic.
-
-.. code-block:: php
-
-    namespace MyApplication;
-
-    use Guzzle\Service\Resource\Model;
-    use Guzzle\Service\Command\OperationResponseParser;
-    use Guzzle\Service\Command\ResponseClassInterface;
-    use Guzzle\Service\Command\OperationCommand;
-
-    class User implements ResponseClassInterface
-    {
-        public static function fromCommand(OperationCommand $command)
-        {
-            $parser = OperationResponseParser::getInstance();
-            $parsedModel = $parser->parse($command);
-
-            return new self($parsedModel);
-        }
-
-        public function __construct(Model $parsedModel)
-        {
-            // Do something with the parsed model object
-        }
-    }
-
 errorResponses
 ~~~~~~~~~~~~~~
 
