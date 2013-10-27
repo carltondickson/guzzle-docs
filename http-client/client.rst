@@ -407,7 +407,7 @@ debug
 ~~~~~
 
 The `debug` option is used to output all data sent over the wire using the `LogPlugin` if it's available, or cURL
-verbose output otherwise.
+verbose output otherwise. Set `debug` to true to enable.
 
 stream
 ~~~~~~
