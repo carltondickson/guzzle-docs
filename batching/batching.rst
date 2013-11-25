@@ -46,7 +46,7 @@ The batch object then iterates over each array of items created by the divisor a
 .. code-block:: php
 
     use Guzzle\Batch\Batch;
-    use Guzzle\Http\BatchRequestTransfer;
+    use Guzzle\Batch\BatchRequestTransfer;
 
     // BatchRequestTransfer acts as both the divisor and transfer strategy
     $transferStrategy = new BatchRequestTransfer(10);
